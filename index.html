@@ -24,58 +24,60 @@
                 <input type="number" id="core-budget" placeholder="e.g., 2500">
             </div>
             <div class="input-group">
+                <label for="safety-balance">Minimum Safety Balance ($)</label>
+                <input type="number" id="safety-balance" placeholder="e.g., 2000 (your buffer)">
+            </div>
+            <div class="input-group">
                 <label for="forecast-months">Forecast Length (Months)</label>
                 <select id="forecast-months">
-                    <option value="1">1 Month</option>
-                    <option value="2">2 Months</option>
-                    <option value="3">3 Months</option>
-                    <option value="4">4 Months</option>
-                    <option value="5">5 Months</option>
-                    <option value="6">6 Months</option>
-                    <option value="7">7 Months</option>
-                    <option value="8">8 Months</option>
-                    <option value="9">9 Months</option>
-                    <option value="10">10 Months</option>
-                    <option value="11">11 Months</option>
                     <option value="12" selected>12 Months</option>
+                    <option value="24">24 Months</option>
+                    <option value="36">36 Months</option>
                 </select>
             </div>
+            <button type="button" id="add-project-btn" class="utility-btn secondary-btn">🎯 Add Project / Goal</button>
         </div>
+        
+        <div id="project-display-container">
+            </div>
 
         <h2>Monthly Details</h2>
-        <div id="monthly-inputs-container">
-        </div>
+        <div id="monthly-inputs-container"></div>
 
         <button id="generate-forecast-btn">Generate Forecast</button>
 
         <div id="forecast-output" class="hidden">
             <h2>Forecast Results</h2>
-            
-            <div id="summary-dashboard">
-                <div class="summary-item">
-                    <span class="summary-label">Total Income</span>
-                    <span class="summary-value" id="summary-total-income">$0</span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Total Expenses</span>
-                    <span class="summary-value" id="summary-total-expenses">$0</span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Net Cash Flow</span>
-                    <span class="summary-value" id="summary-net-flow">$0</span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Lowest Balance</span>
-                    <span class="summary-value" id="summary-lowest-balance">$0</span>
-                    <span class="summary-meta" id="summary-lowest-month"></span>
-                </div>
-            </div>
 
+            <div id="project-results-container">
+                </div>
+            
+            <div id="summary-dashboard"></div>
             <div class="chart-container">
                 <canvas id="balance-chart"></canvas>
             </div>
-            
             <div id="forecast-table-container"></div>
+        </div>
+    </div>
+
+    <div id="project-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <span class="close-modal-btn">&times;</span>
+            <h2>Create a Project / Goal</h2>
+            <div class="input-group">
+                <label for="project-name">Project Name</label>
+                <input type="text" id="project-name" placeholder="e.g., Kitchen Remodel">
+            </div>
+            <div id="project-items-container">
+                <label>Project Items</label>
+                </div>
+            <button type="button" id="add-project-item-btn" class="utility-btn secondary-btn small-btn">+ Add Item</button>
+            <hr>
+            <div class="project-total">
+                <strong>Total Estimated Cost:</strong>
+                <span id="project-total-cost">$0.00</span>
+            </div>
+            <button type="button" id="save-project-btn">Save Project</button>
         </div>
     </div>
 
