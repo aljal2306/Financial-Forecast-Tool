@@ -9,8 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateBtn = document.getElementById('generate-forecast-btn');
     const forecastOutput = document.getElementById('forecast-output');
     const projectDisplayContainer = document.getElementById('project-display-container');
-
-    // --- NEW: Base Pay Elements ---
     const basePayInput = document.getElementById('base-pay');
     const applyBasePayBtn = document.getElementById('apply-base-pay-btn');
 
@@ -28,8 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
     generateBtn.addEventListener('click', runForecast);
     addProjectBtn.addEventListener('click', () => projectModal.classList.remove('hidden'));
     closeModalBtn.addEventListener('click', () => projectModal.classList.add('hidden'));
-
-    // --- NEW: Base Pay Event Listener ---
     applyBasePayBtn.addEventListener('click', () => {
         const basePay = basePayInput.value;
         if (basePay && parseFloat(basePay) > 0) {
@@ -49,10 +45,27 @@ document.addEventListener('DOMContentLoaded', () => {
             renderProjectDisplay();
         }
     });
+    
+    // --- RE-ADDED: Event Listener for "+ Add Expense" buttons ---
+    monthlyInputsContainer.addEventListener('click', (event) => {
+        if (event.target.classList.contains('add-expense-btn')) {
+            const monthIndex = event.target.dataset.month;
+            addOptionalExpenseField(monthIndex);
+        }
+    });
 
     // =================================================================
-    // --- FUNCTIONS (Most are unchanged from the previous version) ---
+    // --- MONTHLY INPUTS & PROJECT FUNCTIONS ---
     // =================================================================
+
+    // --- RE-ADDED: Function to add optional expense fields ---
+    function addOptionalExpenseField(monthIndex) {
+        const container = document.getElementById(`optional-expenses-${monthIndex}`);
+        const expenseItem = document.createElement('div');
+        expenseItem.className = 'expense-item';
+        expenseItem.innerHTML = `<input type="text" class="expense-description" placeholder="Expense Name"><input type="number" class="expense-amount" placeholder="Amount">`;
+        container.appendChild(expenseItem);
+    }
 
     function addProjectItemRow() {
         const row = document.createElement('div');
@@ -76,7 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const name = document.getElementById('project-name').value || 'Untitled Project';
         let totalCost = 0;
         const items = [];
-        
         projectItemsContainer.querySelectorAll('.project-item-row').forEach(row => {
             const itemName = row.querySelector('.project-item-name').value;
             const itemCost = parseFloat(row.querySelector('.project-item-cost').value) || 0;
@@ -110,6 +122,10 @@ document.addEventListener('DOMContentLoaded', () => {
             projectDisplayContainer.appendChild(card);
         }
     }
+
+    // =================================================================
+    // --- CORE FORECASTING & DISPLAY FUNCTIONS ---
+    // =================================================================
 
     function runForecast() {
         const currentBalance = parseFloat(document.getElementById('current-balance').value) || 0;
@@ -158,15 +174,9 @@ document.addEventListener('DOMContentLoaded', () => {
         card.className = 'project-result-card';
         
         if (affordableMonth) {
-            card.innerHTML = `
-                <h3>Congratulations! You can afford your project:</h3>
-                <div class="affordable-date">${affordableMonth}</div>
-            `;
+            card.innerHTML = `<h3>Congratulations! You can afford your project:</h3><div class="affordable-date">${affordableMonth}</div>`;
         } else {
-            card.innerHTML = `
-                <h3>Goal Not Yet Reachable</h3>
-                <div class="not-affordable">You cannot afford this project within the forecast period based on your safety balance.</div>
-            `;
+            card.innerHTML = `<h3>Goal Not Yet Reachable</h3><div class="not-affordable">You cannot afford this project within the forecast period based on your safety balance.</div>`;
         }
         container.appendChild(card);
     }
@@ -195,11 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td data-label="Month">${monthData.month}</td>
                 <td data-label="End Balance" class="currency ${monthData.end < 0 ? 'negative' : ''}">${formatCurrency(monthData.end)}</td>
             </tr>`).join('');
-        container.innerHTML = `
-            <table>
-                <thead><tr><th>Month</th><th>End Balance</th></tr></thead>
-                <tbody>${tableRows}</tbody>
-            </table>`;
+        container.innerHTML = `<table><thead><tr><th>Month</th><th>End Balance</th></tr></thead><tbody>${tableRows}</tbody></table>`;
     }
 
     function displayForecastChart(data) {
