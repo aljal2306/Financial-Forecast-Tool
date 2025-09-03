@@ -19,6 +19,15 @@
                 <label for="current-balance">Current Bank Balance ($)</label>
                 <input type="number" id="current-balance" placeholder="e.g., 5000">
             </div>
+
+            <div class="input-group input-group-with-button">
+                <div class="input-wrapper">
+                    <label for="base-pay">Base Monthly Pay ($)</label>
+                    <input type="number" id="base-pay" placeholder="e.g., 4000">
+                </div>
+                <button type="button" id="apply-base-pay-btn" class="utility-btn small-btn">Apply to All</button>
+            </div>
+
             <div class="input-group">
                 <label for="core-budget">Monthly Core Budget ($)</label>
                 <input type="number" id="core-budget" placeholder="e.g., 2500">
@@ -30,16 +39,36 @@
             <div class="input-group">
                 <label for="forecast-months">Forecast Length (Months)</label>
                 <select id="forecast-months">
+                    <option value="1">1 Month</option>
+                    <option value="2">2 Months</option>
+                    <option value="3">3 Months</option>
+                    <option value="4">4 Months</option>
+                    <option value="5">5 Months</option>
+                    <option value="6">6 Months</option>
+                    <option value="7">7 Months</option>
+                    <option value="8">8 Months</option>
+                    <option value="9">9 Months</option>
+                    <option value="10">10 Months</option>
+                    <option value="11">11 Months</option>
                     <option value="12" selected>12 Months</option>
+                    <option value="13">13 Months</option>
+                    <option value="14">14 Months</option>
+                    <option value="15">15 Months</option>
+                    <option value="16">16 Months</option>
+                    <option value="17">17 Months</option>
+                    <option value="18">18 Months</option>
+                    <option value="19">19 Months</option>
+                    <option value="20">20 Months</option>
+                    <option value="21">21 Months</option>
+                    <option value="22">22 Months</option>
+                    <option value="23">23 Months</option>
                     <option value="24">24 Months</option>
-                    <option value="36">36 Months</option>
                 </select>
             </div>
             <button type="button" id="add-project-btn" class="utility-btn secondary-btn">🎯 Add Project / Goal</button>
         </div>
         
-        <div id="project-display-container">
-            </div>
+        <div id="project-display-container"></div>
 
         <h2>Monthly Details</h2>
         <div id="monthly-inputs-container"></div>
@@ -48,10 +77,7 @@
 
         <div id="forecast-output" class="hidden">
             <h2>Forecast Results</h2>
-
-            <div id="project-results-container">
-                </div>
-            
+            <div id="project-results-container"></div>
             <div id="summary-dashboard"></div>
             <div class="chart-container">
                 <canvas id="balance-chart"></canvas>
@@ -70,7 +96,7 @@
             </div>
             <div id="project-items-container">
                 <label>Project Items</label>
-                </div>
+            </div>
             <button type="button" id="add-project-item-btn" class="utility-btn secondary-btn small-btn">+ Add Item</button>
             <hr>
             <div class="project-total">
