@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- STATE ---
-    let project = null; // Holds the saved project data
+    let project = null;
     let balanceChart = null;
 
     // --- DOM ELEMENTS ---
@@ -9,7 +9,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateBtn = document.getElementById('generate-forecast-btn');
     const forecastOutput = document.getElementById('forecast-output');
     const projectDisplayContainer = document.getElementById('project-display-container');
-    
+
+    // --- NEW: Base Pay Elements ---
+    const basePayInput = document.getElementById('base-pay');
+    const applyBasePayBtn = document.getElementById('apply-base-pay-btn');
+
     // --- MODAL ELEMENTS ---
     const projectModal = document.getElementById('project-modal');
     const addProjectBtn = document.getElementById('add-project-btn');
@@ -24,7 +28,17 @@ document.addEventListener('DOMContentLoaded', () => {
     generateBtn.addEventListener('click', runForecast);
     addProjectBtn.addEventListener('click', () => projectModal.classList.remove('hidden'));
     closeModalBtn.addEventListener('click', () => projectModal.classList.add('hidden'));
-    
+
+    // --- NEW: Base Pay Event Listener ---
+    applyBasePayBtn.addEventListener('click', () => {
+        const basePay = basePayInput.value;
+        if (basePay && parseFloat(basePay) > 0) {
+            document.querySelectorAll('.monthly-income').forEach(input => {
+                input.value = basePay;
+            });
+        }
+    });
+
     // --- PROJECT MODAL EVENTS ---
     addProjectItemBtn.addEventListener('click', addProjectItemRow);
     projectItemsContainer.addEventListener('input', updateProjectTotal);
@@ -37,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // =================================================================
-    // --- PROJECT & GOAL FUNCTIONS ---
+    // --- FUNCTIONS (Most are unchanged from the previous version) ---
     // =================================================================
 
     function addProjectItemRow() {
@@ -97,16 +111,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // =================================================================
-    // --- CORE FORECASTING FUNCTIONS ---
-    // =================================================================
-
     function runForecast() {
-        // ... (code to gather inputs and run main forecast)
         const currentBalance = parseFloat(document.getElementById('current-balance').value) || 0;
         const coreBudget = parseFloat(document.getElementById('core-budget').value) || 0;
         const safetyBalance = parseFloat(document.getElementById('safety-balance').value) || 0;
-        
         let runningBalance = currentBalance;
         let forecastData = [];
         
@@ -122,7 +130,6 @@ document.addEventListener('DOMContentLoaded', () => {
             runningBalance = endOfMonthBalance;
         });
 
-        // --- Calculate affordability and display project results ---
         if (project) {
             let affordableMonth = null;
             for (const monthData of forecastData) {
@@ -136,7 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('project-results-container').innerHTML = '';
         }
 
-        // --- Calculate summary and display all results ---
         const totalIncome = forecastData.reduce((sum, m) => sum + m.income, 0);
         const totalExpenses = forecastData.reduce((sum, m) => sum + m.expenses, 0);
         const netFlow = totalIncome - totalExpenses;
@@ -144,10 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         displayForecast(forecastData, { totalIncome, totalExpenses, netFlow, lowestBalance });
     }
-
-    // =================================================================
-    // --- DISPLAY & HELPER FUNCTIONS ---
-    // =================================================================
     
     function displayProjectResult(affordableMonth) {
         const container = document.getElementById('project-results-container');
@@ -211,7 +213,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function generateMonthlyInputs() {
-        // ... unchanged from previous version ...
+        const monthsCount = parseInt(forecastMonthsSelect.value);
+        monthlyInputsContainer.innerHTML = '';
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const currentMonth = new Date().getMonth();
+        for (let i = 0; i < monthsCount; i++) {
+            const monthIndex = (currentMonth + i) % 12;
+            const year = new Date().getFullYear() + Math.floor((currentMonth + i) / 12);
+            const monthName = `${monthNames[monthIndex]} ${year}`;
+            const accordion = document.createElement('details');
+            accordion.className = 'monthly-accordion';
+            if (i === 0) { accordion.open = true; }
+            accordion.innerHTML = `<summary>${monthName}</summary><div class="monthly-accordion-content"><div class="input-group"><label for="income-${i}">Take-Home Pay ($)</label><input type="number" id="income-${i}" class="monthly-income" placeholder="e.g., 3500"></div><div class="optional-expenses-container" id="optional-expenses-${i}"><label>Optional Additional Expenses</label></div><button type="button" class="utility-btn add-expense-btn" data-month="${i}">+ Add Expense</button></div>`;
+            monthlyInputsContainer.appendChild(accordion);
+        }
     }
 
     function formatCurrency(value) {
