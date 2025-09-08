@@ -11,8 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const projectDisplayContainer = document.getElementById('project-display-container');
     const basePayInput = document.getElementById('base-pay');
     const applyBasePayBtn = document.getElementById('apply-base-pay-btn');
-
-    // --- MODAL ELEMENTS ---
     const projectModal = document.getElementById('project-modal');
     const addProjectBtn = document.getElementById('add-project-btn');
     const closeModalBtn = document.querySelector('.close-modal-btn');
@@ -20,37 +18,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveProjectBtn = document.getElementById('save-project-btn');
     const projectItemsContainer = document.getElementById('project-items-container');
 
-    // --- INITIALIZATION & MAIN EVENTS ---
+    // --- INITIALIZATION & EVENTS ---
     generateMonthlyInputs();
     forecastMonthsSelect.addEventListener('change', generateMonthlyInputs);
     generateBtn.addEventListener('click', runForecast);
     addProjectBtn.addEventListener('click', () => projectModal.classList.remove('hidden'));
     closeModalBtn.addEventListener('click', () => projectModal.classList.add('hidden'));
+    
     applyBasePayBtn.addEventListener('click', () => {
         const basePay = basePayInput.value;
         if (basePay && parseFloat(basePay) > 0) {
-            document.querySelectorAll('.monthly-income').forEach(input => {
-                input.value = basePay;
-            });
+            document.querySelectorAll('.monthly-income').forEach(input => input.value = basePay);
         }
     });
 
-    // --- PROJECT MODAL EVENTS ---
     addProjectItemBtn.addEventListener('click', addProjectItemRow);
     projectItemsContainer.addEventListener('input', updateProjectTotal);
     saveProjectBtn.addEventListener('click', saveProject);
+    
     projectDisplayContainer.addEventListener('click', (e) => {
         if (e.target.classList.contains('remove-project-btn')) {
             project = null;
             renderProjectDisplay();
         }
     });
-    
-    // --- RE-ADDED: Event Listener for "+ Add Expense" buttons ---
+
     monthlyInputsContainer.addEventListener('click', (event) => {
         if (event.target.classList.contains('add-expense-btn')) {
-            const monthIndex = event.target.dataset.month;
-            addOptionalExpenseField(monthIndex);
+            addOptionalExpenseField(event.target.dataset.month);
         }
     });
 
@@ -58,7 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- MONTHLY INPUTS & PROJECT FUNCTIONS ---
     // =================================================================
 
-    // --- RE-ADDED: Function to add optional expense fields ---
     function addOptionalExpenseField(monthIndex) {
         const container = document.getElementById(`optional-expenses-${monthIndex}`);
         const expenseItem = document.createElement('div');
@@ -124,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =================================================================
-    // --- CORE FORECASTING & DISPLAY FUNCTIONS ---
+    // --- CORE FORECASTING & DISPLAY ---
     // =================================================================
 
     function runForecast() {
@@ -133,16 +127,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const safetyBalance = parseFloat(document.getElementById('safety-balance').value) || 0;
         let runningBalance = currentBalance;
         let forecastData = [];
-        
+
         monthlyInputsContainer.querySelectorAll('.monthly-accordion').forEach((accordion, i) => {
             const monthName = accordion.querySelector('summary').textContent;
             const income = parseFloat(accordion.querySelector(`#income-${i}`).value) || 0;
-            let totalOptionalExpenses = 0;
-            accordion.querySelectorAll('.expense-amount').forEach(input => totalOptionalExpenses += parseFloat(input.value) || 0);
+            let optionalExpenses = 0;
+            accordion.querySelectorAll('.expense-amount').forEach(input => optionalExpenses += parseFloat(input.value) || 0);
             
-            const totalExpenses = coreBudget + totalOptionalExpenses;
+            const totalExpenses = coreBudget + optionalExpenses;
             const endOfMonthBalance = runningBalance + income - totalExpenses;
-            forecastData.push({ month: monthName, end: endOfMonthBalance, income, expenses: totalExpenses });
+
+            forecastData.push({ month: monthName, end: endOfMonthBalance, income, expenses: totalExpenses, optionalExpenses });
             runningBalance = endOfMonthBalance;
         });
 
@@ -160,11 +155,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const totalIncome = forecastData.reduce((sum, m) => sum + m.income, 0);
-        const totalExpenses = forecastData.reduce((sum, m) => sum + m.expenses, 0);
-        const netFlow = totalIncome - totalExpenses;
+        const totalOptionalExpenses = forecastData.reduce((sum, m) => sum + m.optionalExpenses, 0);
+        const totalCoreExpenses = (coreBudget * forecastData.length);
+        const netFlow = totalIncome - (totalCoreExpenses + totalOptionalExpenses);
         let lowestBalance = forecastData.length ? forecastData.reduce((l, m) => m.end < l.value ? { value: m.end, month: m.month } : l, { value: forecastData[0].end, month: forecastData[0].month }) : { value: 0, month: '' };
         
-        displayForecast(forecastData, { totalIncome, totalExpenses, netFlow, lowestBalance });
+        const summaryData = { totalIncome, totalCoreExpenses, totalOptionalExpenses, netFlow, lowestBalance };
+        displayForecast(forecastData, summaryData);
     }
     
     function displayProjectResult(affordableMonth) {
@@ -172,7 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = '';
         const card = document.createElement('div');
         card.className = 'project-result-card';
-        
         if (affordableMonth) {
             card.innerHTML = `<h3>Congratulations! You can afford your project:</h3><div class="affordable-date">${affordableMonth}</div>`;
         } else {
@@ -191,10 +187,27 @@ document.addEventListener('DOMContentLoaded', () => {
     function displaySummaryDashboard(summary) {
         const container = document.getElementById('summary-dashboard');
         container.innerHTML = `
-            <div class="summary-item"><span class="summary-label">Total Income</span><span class="summary-value">${formatCurrency(summary.totalIncome)}</span></div>
-            <div class="summary-item"><span class="summary-label">Total Expenses</span><span class="summary-value">${formatCurrency(summary.totalExpenses)}</span></div>
-            <div class="summary-item"><span class="summary-label">Net Cash Flow</span><span class="summary-value ${summary.netFlow >= 0 ? 'positive' : 'negative'}">${formatCurrency(summary.netFlow)}</span></div>
-            <div class="summary-item"><span class="summary-label">Lowest Balance</span><span class="summary-value">${formatCurrency(summary.lowestBalance.value)}</span><span class="summary-meta">in ${summary.lowestBalance.month}</span></div>
+            <div class="summary-item">
+                <span class="summary-label">Total Income</span>
+                <span class="summary-value" id="summary-total-income">${formatCurrency(summary.totalIncome)}</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Total Core Expenses</span>
+                <span class="summary-value" id="summary-core-expenses">${formatCurrency(summary.totalCoreExpenses)}</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Total Optional Expenses</span>
+                <span class="summary-value" id="summary-optional-expenses">${formatCurrency(summary.totalOptionalExpenses)}</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Net Cash Flow</span>
+                <span class="summary-value ${summary.netFlow >= 0 ? 'positive' : 'negative'}" id="summary-net-flow">${formatCurrency(summary.netFlow)}</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Lowest Balance</span>
+                <span class="summary-value" id="summary-lowest-balance">${formatCurrency(summary.lowestBalance.value)}</span>
+                <span class="summary-meta" id="summary-lowest-month">in ${summary.lowestBalance.month}</span>
+            </div>
         `;
     }
 
@@ -213,8 +226,28 @@ document.addEventListener('DOMContentLoaded', () => {
         if (balanceChart) balanceChart.destroy();
         balanceChart = new Chart(ctx, {
             type: 'line',
-            data: { labels: data.map(d => d.month.split(' ')[0]), datasets: [{ label: 'Ending Bank Balance', data: data.map(d => d.end), borderColor: 'rgba(54, 162, 235, 1)', backgroundColor: 'rgba(54, 162, 235, 0.2)', fill: true, tension: 0.1, pointBackgroundColor: data.map(d => d.end < 0 ? '#e74c3c' : 'rgba(54, 162, 235, 1)'), pointRadius: 5 }] },
-            options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { callback: value => '$' + (value / 1000) + 'k' } } }, plugins: { tooltip: { callbacks: { label: context => `${context.dataset.label}: ${formatCurrency(context.parsed.y)}` } }, legend: { display: false } } }
+            data: { 
+                labels: data.map(d => d.month.split(' ')[0]), 
+                datasets: [{ 
+                    label: 'Ending Bank Balance', 
+                    data: data.map(d => d.end), 
+                    borderColor: 'rgba(54, 162, 235, 1)', 
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)', 
+                    fill: true, 
+                    tension: 0.1, 
+                    pointBackgroundColor: data.map(d => d.end < 0 ? '#e74c3c' : 'rgba(54, 162, 235, 1)'), 
+                    pointRadius: 5 
+                }] 
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                scales: { y: { ticks: { callback: value => '$' + (value / 1000) + 'k' } } }, 
+                plugins: { 
+                    tooltip: { callbacks: { label: context => `${context.dataset.label}: ${formatCurrency(context.parsed.y)}` } }, 
+                    legend: { display: false } 
+                } 
+            }
         });
     }
     
