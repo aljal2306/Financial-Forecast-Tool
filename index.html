@@ -11,15 +11,14 @@
 
     <div class="container">
         <h1>Bank Balance Forecaster 📊</h1>
-        <p>Enter your financial details to project your bank balance over the coming months.</p>
+        <p class="no-print">Enter your financial details to project your bank balance over the coming months.</p>
 
-        <div class="card" id="setup-section">
+        <div class="card no-print" id="setup-section">
             <h2>Initial Setup</h2>
             <div class="input-group">
                 <label for="current-balance">Current Bank Balance ($)</label>
                 <input type="number" id="current-balance" placeholder="e.g., 5000">
             </div>
-
             <div class="input-group input-group-with-button">
                 <div class="input-wrapper">
                     <label for="base-pay">Base Monthly Pay ($)</label>
@@ -27,7 +26,6 @@
                 </div>
                 <button type="button" id="apply-base-pay-btn" class="utility-btn small-btn">Apply to All</button>
             </div>
-
             <div class="input-group">
                 <label for="core-budget">Monthly Core Budget ($)</label>
                 <input type="number" id="core-budget" placeholder="e.g., 2500">
@@ -68,15 +66,17 @@
             <button type="button" id="add-project-btn" class="utility-btn secondary-btn">🎯 Add Project / Goal</button>
         </div>
         
-        <div id="project-display-container"></div>
+        <div id="project-display-container" class="no-print"></div>
 
-        <h2>Monthly Details</h2>
-        <div id="monthly-inputs-container"></div>
+        <h2 class="no-print">Monthly Details</h2>
+        <div id="monthly-inputs-container" class="no-print"></div>
 
-        <button id="generate-forecast-btn">Generate Forecast</button>
+        <button id="generate-forecast-btn" class="no-print">Generate Forecast</button>
 
         <div id="forecast-output" class="hidden">
             <h2>Forecast Results</h2>
+            <button type="button" id="print-report-btn" class="utility-btn no-print">🖨️ Share/Print Report</button>
+
             <div id="project-results-container"></div>
             
             <div id="summary-dashboard">
@@ -110,7 +110,7 @@
         </div>
     </div>
 
-    <div id="project-modal" class="modal-overlay hidden">
+    <div id="project-modal" class="modal-overlay hidden no-print">
         <div class="modal-content">
             <span class="close-modal-btn">&times;</span>
             <h2>Create a Project / Goal</h2>
