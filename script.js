@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const projectDisplayContainer = document.getElementById('project-display-container');
     const basePayInput = document.getElementById('base-pay');
     const applyBasePayBtn = document.getElementById('apply-base-pay-btn');
+    const printReportBtn = document.getElementById('print-report-btn');
     const projectModal = document.getElementById('project-modal');
     const addProjectBtn = document.getElementById('add-project-btn');
     const closeModalBtn = document.querySelector('.close-modal-btn');
@@ -24,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     generateBtn.addEventListener('click', runForecast);
     addProjectBtn.addEventListener('click', () => projectModal.classList.remove('hidden'));
     closeModalBtn.addEventListener('click', () => projectModal.classList.add('hidden'));
+    printReportBtn.addEventListener('click', () => window.print());
     
     applyBasePayBtn.addEventListener('click', () => {
         const basePay = basePayInput.value;
@@ -64,18 +66,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function addProjectItemRow() {
         const row = document.createElement('div');
         row.className = 'project-item-row';
-        row.innerHTML = `
-            <input type="text" class="project-item-name" placeholder="Item Name">
-            <input type="number" class="project-item-cost" placeholder="Cost">
-        `;
+        row.innerHTML = `<input type="text" class="project-item-name" placeholder="Item Name"><input type="number" class="project-item-cost" placeholder="Cost">`;
         projectItemsContainer.appendChild(row);
     }
 
     function updateProjectTotal() {
         let total = 0;
-        projectItemsContainer.querySelectorAll('.project-item-cost').forEach(input => {
-            total += parseFloat(input.value) || 0;
-        });
+        projectItemsContainer.querySelectorAll('.project-item-cost').forEach(input => total += parseFloat(input.value) || 0);
         document.getElementById('project-total-cost').textContent = formatCurrency(total);
     }
 
@@ -91,7 +88,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 totalCost += itemCost;
             }
         });
-
         if (totalCost > 0) {
             project = { name, totalCost, items };
             renderProjectDisplay();
@@ -106,13 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (project) {
             const card = document.createElement('div');
             card.className = 'project-card';
-            card.innerHTML = `
-                <div>
-                    <h3>🎯 ${project.name}</h3>
-                    <span class="project-cost">${formatCurrency(project.totalCost)}</span>
-                </div>
-                <button class="remove-project-btn">&times;</button>
-            `;
+            card.innerHTML = `<div><h3>🎯 ${project.name}</h3><span class="project-cost">${formatCurrency(project.totalCost)}</span></div><button class="remove-project-btn">&times;</button>`;
             projectDisplayContainer.appendChild(card);
         }
     }
@@ -133,11 +123,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const income = parseFloat(accordion.querySelector(`#income-${i}`).value) || 0;
             let optionalExpenses = 0;
             accordion.querySelectorAll('.expense-amount').forEach(input => optionalExpenses += parseFloat(input.value) || 0);
-            
             const totalExpenses = coreBudget + optionalExpenses;
             const endOfMonthBalance = runningBalance + income - totalExpenses;
-
-            forecastData.push({ month: monthName, end: endOfMonthBalance, income, expenses: totalExpenses, optionalExpenses });
+            forecastData.push({ month: monthName, end: endOfMonthBalance, income, optionalExpenses });
             runningBalance = endOfMonthBalance;
         });
 
@@ -187,37 +175,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function displaySummaryDashboard(summary) {
         const container = document.getElementById('summary-dashboard');
         container.innerHTML = `
-            <div class="summary-item">
-                <span class="summary-label">Total Income</span>
-                <span class="summary-value" id="summary-total-income">${formatCurrency(summary.totalIncome)}</span>
-            </div>
-            <div class="summary-item">
-                <span class="summary-label">Total Core Expenses</span>
-                <span class="summary-value" id="summary-core-expenses">${formatCurrency(summary.totalCoreExpenses)}</span>
-            </div>
-            <div class="summary-item">
-                <span class="summary-label">Total Optional Expenses</span>
-                <span class="summary-value" id="summary-optional-expenses">${formatCurrency(summary.totalOptionalExpenses)}</span>
-            </div>
-            <div class="summary-item">
-                <span class="summary-label">Net Cash Flow</span>
-                <span class="summary-value ${summary.netFlow >= 0 ? 'positive' : 'negative'}" id="summary-net-flow">${formatCurrency(summary.netFlow)}</span>
-            </div>
-            <div class="summary-item">
-                <span class="summary-label">Lowest Balance</span>
-                <span class="summary-value" id="summary-lowest-balance">${formatCurrency(summary.lowestBalance.value)}</span>
-                <span class="summary-meta" id="summary-lowest-month">in ${summary.lowestBalance.month}</span>
-            </div>
+            <div class="summary-item"><span class="summary-label">Total Income</span><span class="summary-value" id="summary-total-income">${formatCurrency(summary.totalIncome)}</span></div>
+            <div class="summary-item"><span class="summary-label">Total Core Expenses</span><span class="summary-value" id="summary-core-expenses">${formatCurrency(summary.totalCoreExpenses)}</span></div>
+            <div class="summary-item"><span class="summary-label">Total Optional Expenses</span><span class="summary-value" id="summary-optional-expenses">${formatCurrency(summary.totalOptionalExpenses)}</span></div>
+            <div class="summary-item"><span class="summary-label">Net Cash Flow</span><span class="summary-value ${summary.netFlow >= 0 ? 'positive' : 'negative'}" id="summary-net-flow">${formatCurrency(summary.netFlow)}</span></div>
+            <div class="summary-item"><span class="summary-label">Lowest Balance</span><span class="summary-value" id="summary-lowest-balance">${formatCurrency(summary.lowestBalance.value)}</span><span class="summary-meta" id="summary-lowest-month">in ${summary.lowestBalance.month}</span></div>
         `;
     }
 
     function displayForecastTable(data) {
         const container = document.getElementById('forecast-table-container');
-        const tableRows = data.map(monthData => `
-            <tr>
-                <td data-label="Month">${monthData.month}</td>
-                <td data-label="End Balance" class="currency ${monthData.end < 0 ? 'negative' : ''}">${formatCurrency(monthData.end)}</td>
-            </tr>`).join('');
+        const tableRows = data.map(monthData => `<tr><td data-label="Month">${monthData.month}</td><td data-label="End Balance" class="currency ${monthData.end < 0 ? 'negative' : ''}">${formatCurrency(monthData.end)}</td></tr>`).join('');
         container.innerHTML = `<table><thead><tr><th>Month</th><th>End Balance</th></tr></thead><tbody>${tableRows}</tbody></table>`;
     }
 
@@ -252,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function generateMonthlyInputs() {
-        const monthsCount = parseInt(forecastMonthsSelect.value);
+        const monthsCount = parseInt(document.getElementById('forecast-months').value);
         monthlyInputsContainer.innerHTML = '';
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         const currentMonth = new Date().getMonth();
