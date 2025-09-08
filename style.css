@@ -355,3 +355,42 @@ tr:nth-child(even) {
         text-align: right;
     }
 }
+
+@media print {
+    body, .container {
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border: none;
+    }
+    .no-print, .monthly-accordion summary::after {
+        display: none !important;
+    }
+    .container {
+        max-width: 100%;
+    }
+    h1 {
+        display: none;
+    }
+    h2 {
+        font-size: 1.5rem;
+        padding-top: 20px;
+    }
+    #forecast-output {
+        display: block !important;
+    }
+    .summary-item, .project-card, .project-result-card {
+        background-color: #fff !important;
+        border: 1px solid #ccc;
+    }
+    .chart-container {
+        height: 350px;
+        page-break-inside: avoid;
+    }
+    table {
+        page-break-inside: auto;
+    }
+    table tr {
+        page-break-inside: avoid;
+    }
+}
