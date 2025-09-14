@@ -71,6 +71,8 @@
         <h2 class="no-print">Monthly Details</h2>
         <div id="monthly-inputs-container" class="no-print"></div>
 
+        <button type="button" id="add-month-btn" class="utility-btn secondary-btn no-print">+ Add Another Month</button>
+
         <button id="generate-forecast-btn" class="no-print">Generate Forecast</button>
 
         <div id="forecast-output" class="hidden">
@@ -78,31 +80,7 @@
             <button type="button" id="print-report-btn" class="utility-btn no-print">🖨️ Share/Print Report</button>
 
             <div id="project-results-container"></div>
-            
-            <div id="summary-dashboard">
-                <div class="summary-item">
-                    <span class="summary-label">Total Income</span>
-                    <span class="summary-value" id="summary-total-income">$0</span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Total Core Expenses</span>
-                    <span class="summary-value" id="summary-core-expenses">$0</span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Total Optional Expenses</span>
-                    <span class="summary-value" id="summary-optional-expenses">$0</span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Net Cash Flow</span>
-                    <span class="summary-value" id="summary-net-flow">$0</span>
-                </div>
-                <div class="summary-item">
-                    <span class="summary-label">Lowest Balance</span>
-                    <span class="summary-value" id="summary-lowest-balance">$0</span>
-                    <span class="summary-meta" id="summary-lowest-month"></span>
-                </div>
-            </div>
-
+            <div id="summary-dashboard"></div>
             <div class="chart-container">
                 <canvas id="balance-chart"></canvas>
             </div>
