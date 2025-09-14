@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const forecastMonthsSelect = document.getElementById('forecast-months');
     const monthlyInputsContainer = document.getElementById('monthly-inputs-container');
     const generateBtn = document.getElementById('generate-forecast-btn');
+    const addMonthBtn = document.getElementById('add-month-btn');
     const forecastOutput = document.getElementById('forecast-output');
     const projectDisplayContainer = document.getElementById('project-display-container');
     const basePayInput = document.getElementById('base-pay');
@@ -22,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- INITIALIZATION & EVENTS ---
     generateMonthlyInputs();
     forecastMonthsSelect.addEventListener('change', generateMonthlyInputs);
+    addMonthBtn.addEventListener('click', addMonth);
     generateBtn.addEventListener('click', runForecast);
     addProjectBtn.addEventListener('click', () => projectModal.classList.remove('hidden'));
     closeModalBtn.addEventListener('click', () => projectModal.classList.add('hidden'));
@@ -54,6 +56,52 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
     // --- MONTHLY INPUTS & PROJECT FUNCTIONS ---
     // =================================================================
+
+    function createMonthInputCard(monthIndex) {
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const currentMonth = new Date().getMonth();
+        const year = new Date().getFullYear() + Math.floor((currentMonth + monthIndex) / 12);
+        const monthName = `${monthNames[(currentMonth + monthIndex) % 12]} ${year}`;
+
+        const accordion = document.createElement('details');
+        accordion.className = 'monthly-accordion';
+        accordion.innerHTML = `
+            <summary>${monthName}</summary>
+            <div class="monthly-accordion-content">
+                <div class="input-group">
+                    <label for="income-${monthIndex}">Take-Home Pay ($)</label>
+                    <input type="number" id="income-${monthIndex}" class="monthly-income" placeholder="e.g., 3500">
+                </div>
+                <div class="optional-expenses-container" id="optional-expenses-${monthIndex}">
+                    <label>Optional Additional Expenses</label>
+                </div>
+                <button type="button" class="utility-btn add-expense-btn" data-month="${monthIndex}">+ Add Expense</button>
+            </div>`;
+        return accordion;
+    }
+
+    function generateMonthlyInputs() {
+        const monthsCount = parseInt(forecastMonthsSelect.value);
+        monthlyInputsContainer.innerHTML = '';
+        for (let i = 0; i < monthsCount; i++) {
+            const newCard = createMonthInputCard(i);
+            if (i === 0) {
+                newCard.open = true;
+            }
+            monthlyInputsContainer.appendChild(newCard);
+        }
+    }
+
+    function addMonth() {
+        const currentMonthCount = monthlyInputsContainer.children.length;
+        if (currentMonthCount >= 24) {
+            return; 
+        }
+        const newCard = createMonthInputCard(currentMonthCount);
+        newCard.open = true;
+        monthlyInputsContainer.appendChild(newCard);
+        forecastMonthsSelect.value = currentMonthCount + 1;
+    }
 
     function addOptionalExpenseField(monthIndex) {
         const container = document.getElementById(`optional-expenses-${monthIndex}`);
@@ -219,23 +267,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    function generateMonthlyInputs() {
-        const monthsCount = parseInt(document.getElementById('forecast-months').value);
-        monthlyInputsContainer.innerHTML = '';
-        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        const currentMonth = new Date().getMonth();
-        for (let i = 0; i < monthsCount; i++) {
-            const monthIndex = (currentMonth + i) % 12;
-            const year = new Date().getFullYear() + Math.floor((currentMonth + i) / 12);
-            const monthName = `${monthNames[monthIndex]} ${year}`;
-            const accordion = document.createElement('details');
-            accordion.className = 'monthly-accordion';
-            if (i === 0) { accordion.open = true; }
-            accordion.innerHTML = `<summary>${monthName}</summary><div class="monthly-accordion-content"><div class="input-group"><label for="income-${i}">Take-Home Pay ($)</label><input type="number" id="income-${i}" class="monthly-income" placeholder="e.g., 3500"></div><div class="optional-expenses-container" id="optional-expenses-${i}"><label>Optional Additional Expenses</label></div><button type="button" class="utility-btn add-expense-btn" data-month="${i}">+ Add Expense</button></div>`;
-            monthlyInputsContainer.appendChild(accordion);
-        }
-    }
-
     function formatCurrency(value) {
         return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
     }
