@@ -169,11 +169,22 @@ document.addEventListener('DOMContentLoaded', () => {
         monthlyInputsContainer.querySelectorAll('.monthly-accordion').forEach((accordion, i) => {
             const monthName = accordion.querySelector('summary').textContent;
             const income = parseFloat(accordion.querySelector(`#income-${i}`).value) || 0;
-            let optionalExpenses = 0;
-            accordion.querySelectorAll('.expense-amount').forEach(input => optionalExpenses += parseFloat(input.value) || 0);
-            const totalExpenses = coreBudget + optionalExpenses;
+            
+            let optionalExpensesTotal = 0;
+            const expenseItems = [];
+            accordion.querySelectorAll('.expense-item').forEach(item => {
+                const name = item.querySelector('.expense-description').value;
+                const amount = parseFloat(item.querySelector('.expense-amount').value) || 0;
+                if (name && amount > 0) {
+                    expenseItems.push({ name, amount });
+                    optionalExpensesTotal += amount;
+                }
+            });
+            
+            const totalExpenses = coreBudget + optionalExpensesTotal;
             const endOfMonthBalance = runningBalance + income - totalExpenses;
-            forecastData.push({ month: monthName, end: endOfMonthBalance, income, optionalExpenses });
+
+            forecastData.push({ month: monthName, end: endOfMonthBalance, income, optionalExpenses: optionalExpensesTotal, expenseItems });
             runningBalance = endOfMonthBalance;
         });
 
@@ -233,8 +244,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function displayForecastTable(data) {
         const container = document.getElementById('forecast-table-container');
-        const tableRows = data.map(monthData => `<tr><td data-label="Month">${monthData.month}</td><td data-label="End Balance" class="currency ${monthData.end < 0 ? 'negative' : ''}">${formatCurrency(monthData.end)}</td></tr>`).join('');
-        container.innerHTML = `<table><thead><tr><th>Month</th><th>End Balance</th></tr></thead><tbody>${tableRows}</tbody></table>`;
+        container.innerHTML = '';
+        if (data.length === 0) return;
+
+        data.forEach(monthData => {
+            const card = document.createElement('div');
+            card.className = 'month-report-card';
+
+            let expensesHtml = '<p style="padding: 0 15px 15px; margin:0; color: #6c757d;">No optional expenses this month.</p>';
+            if (monthData.expenseItems.length > 0) {
+                expensesHtml = `
+                    <div class="month-report-details">
+                        <h5>Optional Expenses</h5>
+                        <ul class="expense-list">
+                            ${monthData.expenseItems.map(item => `
+                                <li class="expense-list-item">
+                                    <span>${item.name}</span>
+                                    <span>${formatCurrency(item.amount)}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>`;
+            }
+
+            card.innerHTML = `
+                <div class="month-report-header">
+                    <h4>${monthData.month}</h4>
+                    <span class="month-report-balance ${monthData.end < 0 ? 'negative' : ''}">${formatCurrency(monthData.end)}</span>
+                </div>
+                ${expensesHtml}
+            `;
+            container.appendChild(card);
+        });
     }
 
     function displayForecastChart(data) {
