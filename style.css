@@ -309,6 +309,11 @@ tr:nth-child(even) {
     font-size: 1.2rem;
 }
 
+#add-month-btn {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
 @media (max-width: 768px) {
     body {
         padding: 5px;
